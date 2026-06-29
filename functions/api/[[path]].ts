@@ -82,7 +82,6 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
 
     if (path.startsWith('files/') && method === 'GET') {
-      requireVisitor(context.request, context.env)
       return serveFile(context.env, decodeURIComponent(path.slice('files/'.length)))
     }
 
