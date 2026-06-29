@@ -185,6 +185,13 @@ function App() {
     await loadLobby()
   }
 
+  async function deleteDeveloper() {
+    if (!developerDraft?.id || !confirm('确认删除这个开发者？')) return
+    await api(`/api/developers/${developerDraft.id}`, { method: 'DELETE' })
+    setDeveloperDraft(null)
+    await loadLobby()
+  }
+
   async function uploadCrest() {
     if (!crestFile) return teamDraft?.crestKey || ''
     const form = new FormData()
@@ -204,6 +211,14 @@ function App() {
     const method = payload.id ? 'PUT' : 'POST'
     const path = payload.id ? `/api/teams/${payload.id}` : '/api/teams'
     await api(path, { method, body: JSON.stringify(payload) })
+    setTeamDraft(null)
+    setCrestFile(null)
+    await loadLobby()
+  }
+
+  async function deleteTeam() {
+    if (!teamDraft?.id || !confirm('确认删除这个队伍？')) return
+    await api(`/api/teams/${teamDraft.id}`, { method: 'DELETE' })
     setTeamDraft(null)
     setCrestFile(null)
     await loadLobby()
@@ -324,6 +339,7 @@ function App() {
             setDraft={setDeveloperDraft}
             skillTags={skillTags}
             onCancel={() => setDeveloperDraft(null)}
+            onDelete={developerDraft.id ? deleteDeveloper : undefined}
             onSubmit={saveDeveloper}
           />
         </Dialog>
@@ -342,6 +358,7 @@ function App() {
               setTeamDraft(null)
               setCrestFile(null)
             }}
+            onDelete={teamDraft.id ? deleteTeam : undefined}
             onSubmit={saveTeam}
           />
         </Dialog>
@@ -748,12 +765,14 @@ function DeveloperForm({
   setDraft,
   skillTags,
   onCancel,
+  onDelete,
   onSubmit,
 }: {
   draft: DeveloperDraft
   setDraft: (draft: DeveloperDraft) => void
   skillTags: string[]
   onCancel: () => void
+  onDelete?: () => void
   onSubmit: (event: FormEvent) => void
 }) {
   return (
@@ -787,7 +806,7 @@ function DeveloperForm({
           onChange={(event) => setDraft({ ...draft, wechatId: event.target.value })}
         />
       </label>
-      <FormActions onCancel={onCancel} />
+      <FormActions onCancel={onCancel} onDelete={onDelete} />
     </form>
   )
 }
@@ -800,6 +819,7 @@ function TeamForm({
   crestFile,
   setCrestFile,
   onCancel,
+  onDelete,
   onSubmit,
 }: {
   draft: TeamDraft
@@ -809,6 +829,7 @@ function TeamForm({
   crestFile: File | null
   setCrestFile: (file: File | null) => void
   onCancel: () => void
+  onDelete?: () => void
   onSubmit: (event: FormEvent) => void
 }) {
   return (
@@ -895,7 +916,7 @@ function TeamForm({
           rows={4}
         />
       </label>
-      <FormActions onCancel={onCancel} />
+      <FormActions onCancel={onCancel} onDelete={onDelete} />
     </form>
   )
 }
@@ -969,9 +990,20 @@ function Dialog({
   )
 }
 
-function FormActions({ onCancel }: { onCancel: () => void }) {
+function FormActions({
+  onCancel,
+  onDelete,
+}: {
+  onCancel: () => void
+  onDelete?: () => void
+}) {
   return (
     <div className="form-actions">
+      {onDelete && (
+        <button className="danger" type="button" onClick={() => void onDelete()}>
+          删除
+        </button>
+      )}
       <button className="ghost" type="button" onClick={onCancel}>
         取消
       </button>

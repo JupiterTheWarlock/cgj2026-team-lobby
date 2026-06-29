@@ -64,6 +64,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       )
     }
 
+    if (path.startsWith('developers/') && method === 'DELETE') {
+      requireVisitor(context.request, context.env)
+      return json(await deleteDeveloper(context.env, path.split('/')[1]))
+    }
+
     if (path === 'teams' && method === 'POST') {
       requireVisitor(context.request, context.env)
       return json(await saveTeam(context.env, await context.request.json()))
@@ -74,6 +79,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       return json(
         await saveTeam(context.env, await context.request.json(), path.split('/')[1]),
       )
+    }
+
+    if (path.startsWith('teams/') && method === 'DELETE') {
+      requireVisitor(context.request, context.env)
+      return json(await deleteTeam(context.env, path.split('/')[1]))
     }
 
     if (path === 'uploads/crest' && method === 'POST') {
@@ -190,6 +200,11 @@ async function saveDeveloper(env: Env, input: unknown, id: string = crypto.rando
   return { ok: true, id }
 }
 
+async function deleteDeveloper(env: Env, id: string) {
+  await env.DB.prepare('DELETE FROM developers WHERE id = ?').bind(id).run()
+  return { ok: true, id }
+}
+
 async function saveTeam(env: Env, input: unknown, id: string = crypto.randomUUID()) {
   const data = normalizeTeam(input)
   const memberIds = await validMemberIds(env, data.memberIds)
@@ -257,6 +272,15 @@ async function saveTeam(env: Env, input: unknown, id: string = crypto.randomUUID
   return { ok: true, id }
 }
 
+async function deleteTeam(env: Env, id: string) {
+  const team = await env.DB.prepare('SELECT crest_key FROM teams WHERE id = ?')
+    .bind(id)
+    .first<{ crest_key: string | null }>()
+  await env.DB.prepare('DELETE FROM teams WHERE id = ?').bind(id).run()
+  if (team?.crest_key) await env.CRESTS.delete(team.crest_key).catch(() => undefined)
+  return { ok: true, id }
+}
+
 async function validMemberIds(env: Env, memberIds: string[]) {
   if (!memberIds.length) return []
   const placeholders = memberIds.map(() => '?').join(', ')
@@ -297,7 +321,7 @@ async function serveFile(env: Env, key: string) {
   if (!object?.body) throw new HttpError(404, '文件不存在')
   const headers = new Headers()
   object.writeHttpMetadata(headers)
-  headers.set('cache-control', 'public, max-age=86400')
+  headers.set('cache-control', 'no-store')
   headers.set('etag', object.httpEtag)
   return new Response(object.body, { headers })
 }

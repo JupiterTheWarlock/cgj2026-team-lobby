@@ -127,6 +127,10 @@ button.active {
   background: var(--cyan);
 }
 
+button.danger {
+  background: #ff6b6b;
+}
+
 button.ghost {
   background: #fff;
 }
