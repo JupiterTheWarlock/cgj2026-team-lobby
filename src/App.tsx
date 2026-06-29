@@ -553,11 +553,9 @@ function DeveloperSection({
   })
   const groups = new Map<string, Developer[]>()
   for (const skill of skillTags) groups.set(skill, [])
-  groups.set('未分类', [])
   for (const developer of visible) {
-    const skills = developer.skills.length ? developer.skills : ['未分类']
-    for (const skill of skills) {
-      if (!groups.has(skill)) groups.set(skill, [])
+    const skills = developer.skills.filter((skill) => skillTags.includes(skill))
+    for (const skill of skills.length ? skills : ['其他']) {
       groups.get(skill)?.push(developer)
     }
   }
