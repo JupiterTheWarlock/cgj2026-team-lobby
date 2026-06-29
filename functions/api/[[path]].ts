@@ -30,6 +30,7 @@ const DEFAULT_SKILLS = [
   '策划',
   '美术',
   '音乐',
+  '摸鱼',
   'solo',
   'Unity',
   'Godot',
@@ -109,7 +110,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 }
 
 async function getLobby(env: Env) {
-  const [developers, developerSkills, teams, members, currentSkills, wantedSkills, skillTags] =
+  const [developers, developerSkills, teams, members, currentSkills, wantedSkills] =
     await Promise.all([
       env.DB.prepare('SELECT * FROM developers ORDER BY created_at DESC').all<DeveloperRow>(),
       env.DB.prepare('SELECT developer_id, skill FROM developer_skills').all<{
@@ -131,7 +132,6 @@ async function getLobby(env: Env) {
         team_id: string
         skill: string
       }>(),
-      env.DB.prepare('SELECT name FROM skill_tags ORDER BY name').all<{ name: string }>(),
     ])
 
   return {
@@ -160,9 +160,7 @@ async function getLobby(env: Env) {
       createdAt: team.created_at,
       updatedAt: team.updated_at,
     })),
-    skillTags: Array.from(
-      new Set([...DEFAULT_SKILLS, ...skillTags.results.map((tag) => tag.name)]),
-    ),
+    skillTags: DEFAULT_SKILLS,
   }
 }
 
@@ -187,9 +185,6 @@ async function saveDeveloper(env: Env, input: unknown, id: string = crypto.rando
         ).bind(id, data.wechatName, data.intro, data.wechatId, now, now),
     env.DB.prepare('DELETE FROM developer_skills WHERE developer_id = ?').bind(id),
     ...data.skills.map((skill) =>
-      env.DB.prepare('INSERT OR IGNORE INTO skill_tags (name) VALUES (?)').bind(skill),
-    ),
-    ...data.skills.map((skill) =>
       env.DB.prepare('INSERT INTO developer_skills (developer_id, skill) VALUES (?, ?)').bind(
         id,
         skill,
@@ -213,8 +208,6 @@ async function saveTeam(env: Env, input: unknown, id: string = crypto.randomUUID
   }
   const now = new Date().toISOString()
   const exists = await env.DB.prepare('SELECT id FROM teams WHERE id = ?').bind(id).first()
-  const allSkills = [...data.currentSkills, ...data.wantedSkills]
-
   const statements = [
     exists
       ? env.DB.prepare(
@@ -251,9 +244,6 @@ async function saveTeam(env: Env, input: unknown, id: string = crypto.randomUUID
       env.DB.prepare(
         'INSERT INTO team_members (team_id, developer_id, created_at) VALUES (?, ?, ?)',
       ).bind(id, developerId, now),
-    ),
-    ...allSkills.map((skill) =>
-      env.DB.prepare('INSERT OR IGNORE INTO skill_tags (name) VALUES (?)').bind(skill),
     ),
     ...data.currentSkills.map((skill) =>
       env.DB.prepare('INSERT INTO team_current_skills (team_id, skill) VALUES (?, ?)').bind(

@@ -64,6 +64,7 @@ INSERT OR IGNORE INTO skill_tags (name) VALUES
   ('策划'),
   ('美术'),
   ('音乐'),
+  ('摸鱼'),
   ('solo'),
   ('Unity'),
   ('Godot'),

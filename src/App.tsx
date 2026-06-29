@@ -58,6 +58,7 @@ const DEFAULT_SKILLS = [
   '策划',
   '美术',
   '音乐',
+  '摸鱼',
   'solo',
   'Unity',
   'Godot',
