@@ -47,6 +47,8 @@ npm run deploy
 
 GitHub Pages 集成也可以在 Cloudflare Dashboard 里连接本仓库，构建命令为 `npm run build`，输出目录为 `dist`。
 
+如果 Wrangler 报 `User->Memberships->Read` 或 `Authentication error [code: 10000]`，按 [Cloudflare 部署手册](docs/cloudflare-deploy.md) 恢复权限后再部署。
+
 ## 数据安全
 
 - 不提交 `.dev.vars`。
