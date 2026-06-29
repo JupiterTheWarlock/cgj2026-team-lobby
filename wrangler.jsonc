@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "cgj2026-team-lobby",
+  "pages_build_output_dir": "./dist",
+  "compatibility_date": "2026-06-29",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "cgj2026-team-lobby",
+      "database_id": "11111111-1111-4111-8111-111111111111",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "CRESTS",
+      "bucket_name": "cgj2026-team-crests"
+    }
+  ]
+}

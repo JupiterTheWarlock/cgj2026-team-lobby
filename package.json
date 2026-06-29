@@ -1,0 +1,32 @@
+{
+  "name": "cgj2026-team-lobby",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && npm run typecheck:functions && vite build",
+    "typecheck:functions": "tsc -p tsconfig.functions.json",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "pages:dev": "npm run build && wrangler pages dev ./dist",
+    "d1:migrate:local": "wrangler d1 migrations apply cgj2026-team-lobby --local",
+    "d1:migrate:remote": "wrangler d1 migrations apply cgj2026-team-lobby --remote",
+    "deploy": "npm run build && wrangler pages deploy ./dist --project-name cgj2026-team-lobby"
+  },
+  "dependencies": {
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260629.1",
+    "@types/node": "^24.13.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "oxlint": "^1.69.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.1.0",
+    "wrangler": "^4.105.0"
+  }
+}
