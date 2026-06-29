@@ -8,31 +8,21 @@
 - D1 数据库名：`cgj2026-team-lobby`
 - R2 bucket 名：`cgj2026-team-crests`
 
-## 当前阻塞
+## 当前部署
 
-当前环境变量 `CLOUDFLARE_API_TOKEN` 能通过 `wrangler whoami`，但不能访问 D1、R2、Pages：
+已部署：
+
+- Production URL：`https://cgj2026-team-lobby.pages.dev/`
+- D1 database_id：`573fa7df-bbd0-4041-8a45-34b0a368bda2`
+- R2 bucket：`cgj2026-team-crests`
+
+生产凭据保存在本机输出文件，不提交到 Git：
 
 ```txt
-Authentication error [code: 10000]
-Are you missing the User->Memberships->Read permission?
+C:\Users\Administrator\Documents\Codex\2026-06-29\https-peropero-feishu-cn-base-sknobighaalfuzsx437cypxonad\outputs\cgj2026-deploy-credentials.json
 ```
 
-最省事的处理方式是在交互终端运行：
-
-```powershell
-Remove-Item Env:CLOUDFLARE_API_TOKEN -ErrorAction SilentlyContinue
-npx wrangler login
-npx wrangler whoami
-```
-
-如果继续使用 API token，需要给 token 至少覆盖这些能力：
-
-- User Memberships Read
-- Account 级 Cloudflare Pages 读写
-- Account 级 D1 读写
-- Account 级 R2 读写
-
-## 权限恢复后的部署步骤
+## 重新部署步骤
 
 在项目目录执行：
 
@@ -40,37 +30,13 @@ npx wrangler whoami
 cd C:\Users\Administrator\Documents\Codex\2026-06-29\https-peropero-feishu-cn-base-sknobighaalfuzsx437cypxonad\work\cgj2026-team-lobby
 ```
 
-创建 D1：
-
-```powershell
-npx wrangler d1 create cgj2026-team-lobby
-```
-
-把返回的 `database_id` 写入 `wrangler.jsonc`：
-
-```jsonc
-"database_id": "<真实 D1 database_id>"
-```
-
-创建 R2：
-
-```powershell
-npx wrangler r2 bucket create cgj2026-team-crests
-```
-
-应用远端 migration：
+如果 schema 变更，先应用远端 migration：
 
 ```powershell
 npm run d1:migrate:remote
 ```
 
-创建 Pages 项目：
-
-```powershell
-npx wrangler pages project create cgj2026-team-lobby --production-branch main
-```
-
-设置生产 secrets：
+如需轮换生产 secrets：
 
 ```powershell
 "<活动码>" | npx wrangler pages secret put ACTIVITY_CODE --project-name cgj2026-team-lobby
@@ -113,3 +79,15 @@ npx wrangler pages dev ./dist --persist-to C:\cf-d1-cgj2026 --port 8788
 - 大厅读取
 - 队徽文件读取
 - 管理员 CSV 导出
+
+## 线上验证记录
+
+已验证：
+
+- `GET /` 返回 200
+- 未带活动码访问 `/api/lobby` 返回 401
+- 带活动码访问 `/api/lobby` 返回 200
+- 队徽可上传到 R2 并通过 `/api/files/:key` 读取
+- 管理员 CSV 导出返回 200
+- 验证用 R2 object 已删除
+- 远端 D1 当前 `developers = 0`、`teams = 0`

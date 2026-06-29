@@ -28,20 +28,18 @@ ADMIN_PASSWORD="管理员密码"
 
 ## Cloudflare 资源
 
-需要创建：
+Production URL: <https://cgj2026-team-lobby.pages.dev/>
+
+已创建：
 
 ```bash
 npx wrangler d1 create cgj2026-team-lobby
 npx wrangler r2 bucket create cgj2026-team-crests
 ```
 
-把 D1 返回的 `database_id` 写入 `wrangler.jsonc`，然后执行：
+`wrangler.jsonc` 已写入当前 D1 `database_id`。重新部署：
 
 ```bash
-npm run d1:migrate:remote
-npx wrangler pages project create cgj2026-team-lobby --production-branch main
-printf "活动码" | npx wrangler pages secret put ACTIVITY_CODE --project-name cgj2026-team-lobby
-printf "管理员密码" | npx wrangler pages secret put ADMIN_PASSWORD --project-name cgj2026-team-lobby
 npm run deploy
 ```
 
